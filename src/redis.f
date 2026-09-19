@@ -1,8 +1,8 @@
 /*
-Redis database package for Nift. v0.1.0 backend: the redis-cli executable.
-Public API: the exported `redis` struct. Helpers stay private.
-redis-cli --json gives machine-readable replies; a temp file bridges the
-JSON output into Nift values (the language has no JSON-string parser yet).
+    Redis database package for Nift. v0.1.0 backend: the redis-cli executable.
+    Public API: the exported `redis` struct. Helpers stay private.
+    redis-cli --json gives machine-readable replies; a temp file bridges the
+    JSON output into Nift values (the language has no JSON-string parser yet).
 */
 
 fn(redis_available()) { return which("redis-cli") != null }
@@ -51,37 +51,24 @@ fn(redis_cli_json(args)) {
     return {"ok":true,"data":data,"error":"","exit_code":0}
 }
 
-fn(redis_copy(base)) {
-    out := []
-    for(item : base) { out.push(item) }
-    return out
-}
-
 fn(redis_get(client, key)) {
-    args := redis_copy(client.conn); args.push("GET"); args.push(key)
-    return redis_cli_json(args)
+    return redis_cli_json(client.conn + ["GET", key])
 }
 fn(redis_set(client, key, value)) {
-    args := redis_copy(client.conn); args.push("SET"); args.push(key); args.push(value)
-    return redis_cli_json(args)
+    return redis_cli_json(client.conn + ["SET", key, value])
 }
 fn(redis_del(client, key)) {
-    args := redis_copy(client.conn); args.push("DEL"); args.push(key)
-    return redis_cli_json(args)
+    return redis_cli_json(client.conn + ["DEL", key])
 }
 fn(redis_exists(client, key)) {
-    args := redis_copy(client.conn); args.push("EXISTS"); args.push(key)
-    return redis_cli_json(args)
+    return redis_cli_json(client.conn + ["EXISTS", key])
 }
 fn(redis_expire(client, key, seconds)) {
-    args := redis_copy(client.conn); args.push("EXPIRE"); args.push(key); args.push(seconds.to_string())
-    return redis_cli_json(args)
+    return redis_cli_json(client.conn + ["EXPIRE", key, seconds.to_string()])
 }
 
 fn(redis_command(client, ...rest)) {
-    args := redis_copy(client.conn)
-    for(item : rest) { args.push(item) }
-    return redis_cli_json(args)
+    return redis_cli_json(client.conn + rest)
 }
 
 @struct(redis_api) {
